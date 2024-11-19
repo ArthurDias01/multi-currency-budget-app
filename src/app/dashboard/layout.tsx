@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/sidebar";
+import { SidebarComponent } from "@/components/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({
@@ -9,7 +9,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar />
+        <SidebarComponent />
         <main className="flex-1 overflow-y-auto overflow-x-auto bg-gray-100 p-8">
           <div className="w-full">
             {children}

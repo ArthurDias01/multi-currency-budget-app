@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import { AlertCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signInAction } from "../auth-actions";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -25,13 +26,12 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await signInAction({
       email,
       password,
     });
@@ -44,14 +44,21 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    const supabase = await createClient();
     setIsLoading(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: "openid profile email",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
     });
+
     if (error) {
       setError(error.message);
       setIsLoading(false);

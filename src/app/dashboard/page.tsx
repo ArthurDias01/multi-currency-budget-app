@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 // Mock data for demonstration purposes
 const transactions = [
@@ -60,7 +62,19 @@ const transactions = [
   },
 ];
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error("[Dashboard] authentication error", error);
+    redirect("/sign-in");
+  }
+
   return (
     <div className="md:max-w-full">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
@@ -76,7 +90,9 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Monthly Income
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$6,000.00</div>
@@ -84,7 +100,9 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Monthly Expenses
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$1,850.00</div>
@@ -158,7 +176,9 @@ export default function Dashboard() {
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell
                       className={
-                        transaction.amount > 0 ? "text-green-600" : "text-red-600"
+                        transaction.amount > 0
+                          ? "text-green-600"
+                          : "text-red-600"
                       }
                     >
                       {transaction.amount > 0 ? "+" : ""}
