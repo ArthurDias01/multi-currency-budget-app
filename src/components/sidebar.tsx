@@ -1,28 +1,15 @@
-"use client";
-
 import {
   BarChart3,
   Calendar,
   CreditCard,
   Home,
-  LogOut,
   PieChart,
   Plus,
-  Settings,
-  User,
-  Wallet,
+  Wallet
 } from "lucide-react";
 
-import { signOutAction } from "@/app/auth-actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Sidebar,
   SidebarContent,
@@ -33,15 +20,21 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { createClient } from "@/lib/supabase/server";
+import { ProfileMenu } from "./profile-menu";
 
-export function SidebarComponent() {
-  const handleSignOut = async () => {
-    try {
-      await signOutAction();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+export async function SidebarComponent() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    console.error(error);
+    return null;
+  }
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -113,41 +106,7 @@ export function SidebarComponent() {
           </Button>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton size="lg" className="w-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatars/01.png" alt="@johndoe" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium">John Doe</span>
-                      <span className="text-xs text-muted-foreground">
-                        john@example.com
-                      </span>
-                    </div>
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  side="right"
-                  align="start"
-                  className="w-56"
-                >
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSignOut()}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ProfileMenu user={user} />
             </SidebarMenuItem>
           </SidebarMenu>
         </div>
